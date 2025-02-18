@@ -1,0 +1,133 @@
+"use client";
+import React from 'react';
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
+import Link from 'next/link';
+import { SignupValues } from '@/utils/constants';
+import { signupSchema } from '@/utils/validations';
+import { post, useApi } from '@/helpers/useApi';
+import { toast } from 'react-toastify';
+
+export default function SignupPage() {
+
+    const { makeRequest, loading, error, resetError } = useApi();
+
+    const handleSubmit = async (values: SignupValues, { setSubmitting }: FormikHelpers<SignupValues>) => {
+        try {
+            const response = await makeRequest("auth/signup", post, values);
+            if (response.error) {
+                toast(response.message, {
+                    type: "error",
+                    autoClose: 2000
+                });
+            } else {
+                toast("Registration Done Successfully", {
+                    type: "success",
+                    autoClose: 2000
+                });
+            }
+        } catch (error: any) {
+            console.error(error);
+        }
+
+
+    };
+
+    return (
+        <div className="min-h-screen bg-white overflow-hidden">
+            {/* Navigation */}
+            <header className="flex w-full h-[155px] mb-5">
+                <div className="flex-[8.5] bg-yellow-300 flex items-center px-10 justify-between" style={{ borderRadius: "0 0 90px 0px" }}>
+                    <Link href="/">
+                        <img src="/MainLogo2.png" alt="Placeholder" width={120} height={120} />
+                    </Link>
+                    <nav className="flex w-full items-center justify-between text-lg">
+                        {/* Centered Navigation Buttons */}
+                        <div className="flex space-x-20 justify-center flex-1">
+                            <Link href="#" className="px-5 py-2 border border-white border-2 rounded-full font-bold">
+                                Home
+                            </Link>
+                            <Link href="#" className="px-5 py-2 font-bold">About</Link>
+                            <Link href="#" className="px-5 py-2 font-bold">Mission</Link>
+                        </div>
+                        {/* Right-aligned Sign Up & Login */}
+                        <div className="flex space-x-6">
+                            <Link href="/signup" className="px-5 py-2 bg-white rounded-full font-bold">Sign Up</Link>
+                            <Link href="/login" className="px-5 py-2 rounded-full font-bold">Login</Link>
+                        </div>
+                    </nav>
+                </div>
+                <div className="flex-[1.5] bg-white flex items-center justify-center">
+                    <img src="/MainLogo3.png" alt="Placeholder" width={100} height={100} />
+                </div>
+            </header>
+
+            {/* Main Content */}
+            <main className="container px-4 m-auto flex flex-col items-start justify-center py-16">
+                <h2 className="text-6xl font-bold">Create new account</h2>
+                <p className="text-black font-semiBold mt-2">
+                    Already Registered?{" "}
+                    <Link href='/login' className="text-yellow-400 underline font-semibold">Login</Link>
+                </p>
+                <Formik
+                    validationSchema={signupSchema}
+                    initialValues={{ name: "", email: "", password: "", confirmPassword: "" }}
+                    onSubmit={handleSubmit}
+                >
+                    <Form className="mt-8 space-y-6 w-full max-w-3xl">
+                        <div className="grid grid-cols-2 gap-10">
+                            <div>
+                                <label className="block text-sm font-medium">NAME</label>
+                                <Field
+                                    type="text"
+                                    name="name"
+                                    className="w-full h-14 mt-1 p-2 border border-gray-300 rounded-lg bg-gray-200"
+                                />
+                                <ErrorMessage name="name" component="div" className="text-red-500 text-md" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium">EMAIL</label>
+                                <Field
+                                    type="email"
+                                    name="email"
+                                    className="w-full h-14 mt-1 p-2 border border-gray-300 rounded-lg bg-gray-200"
+                                />
+                                <ErrorMessage name="email" component="div" className="text-red-500 text-md" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-10">
+                            <div>
+                                <label className="block text-sm font-medium">PASSWORD</label>
+                                <Field
+                                    type="password"
+                                    name="password"
+                                    className="w-full h-14 mt-1 p-2 border border-gray-300 rounded-lg bg-gray-200"
+                                />
+                                <ErrorMessage name="password" component="div" className="text-red-500 text-md" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium">
+                                    CONFIRM PASSWORD
+                                </label>
+                                <Field
+                                    type="password"
+                                    name="confirmPassword"
+                                    className="w-full h-14 mt-1 p-2 border border-gray-300 rounded-lg bg-gray-200"
+                                />
+                                <ErrorMessage name="confirmPassword" component="div" className="text-red-500 text-md" />
+                            </div>
+                        </div>
+                        <div className="flex justify-center items-center w-full">
+                            <button
+                                type="submit"
+                                className="w-fit px-20 py-3 bg-yellow-300 rounded-lg text-white font-bold mt-4 hover:bg-yellow-400"
+                            >
+                                Sign up
+                            </button>
+                        </div>
+                    </Form>
+                </Formik>
+            </main>
+        </div>
+
+    );
+}
