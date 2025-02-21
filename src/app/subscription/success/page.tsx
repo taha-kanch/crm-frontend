@@ -2,17 +2,18 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { post, useApi } from "@/helpers/useApi";
+import { SubscriptionService } from "@/api/Services/SubscriptionService";
+import { toast } from "react-toastify";
+
+const subscriptionService = new SubscriptionService();
 
 export default function SubscriptionSuccessPage() {
 
-
-    const { makeRequest } = useApi();
     const searchParams = useSearchParams();
     const router = useRouter();
     const sessionId = searchParams.get("session_id");
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>("");
 
     useEffect(() => {
         if (sessionId) {
@@ -22,12 +23,15 @@ export default function SubscriptionSuccessPage() {
 
     const confirmPayment = async () => {
         try {
-            const response = await makeRequest("stripe/confirm-payment", post, {
+            const response = await subscriptionService.confirmPayment({
                 session_id: sessionId
             });
-            setLoading(false);
+            if (!response.isOk) {
+                setError(response.data.message);
+            }
         } catch (err: any) {
             setError(err.message);
+        } finally {
             setLoading(false);
         }
     };

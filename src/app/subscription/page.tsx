@@ -1,15 +1,16 @@
 "use client";
-import { useApi, get, post } from "@/helpers/useApi";
+import { SubscriptionService } from "@/api/Services/SubscriptionService";
 import { SubscriptionPlan } from "@/utils/constants";
 import React from "react";
+import { toast } from "react-toastify";
 
 const bgColor = ['bg-white', 'bg-primary'];
 const buttonBgColor = ['bg-primary', 'bg-white'];
 
+const subscriptionService = new SubscriptionService();
 
 const SubscriptionPage = () => {
 
-    const { makeRequest, loading, error, resetError } = useApi();
     const [subscriptionPlans, setSubscriptionPlans] = React.useState<SubscriptionPlan[]>([]);
 
     React.useEffect(() => {
@@ -17,27 +18,43 @@ const SubscriptionPage = () => {
     }, []);
 
     const fetchSubscriptionPlans = async () => {
-        console.log("call subscription");
-        const response = await makeRequest("subscription", get, null);
-        const data = response.map((item: SubscriptionPlan) => {
-            return {
-                ...item,
-                features: item.description ? item.description.split(',') : [],
-                pricePerMonth: item.subscriptionType.typeName == "Yearly" ? item.price / 12 : item.price
-            }
-        })
-        setSubscriptionPlans(data);
+        const response = await subscriptionService.getSubscriptions();
+        if (!response.isOk) {
+            toast(response.data.message, {
+                type: "error",
+                autoClose: 2000,
+            });
+        }
+        else {
+            const subscriptionData = response.data.map((item: SubscriptionPlan) => {
+                return {
+                    ...item,
+                    features: item.description ? item.description.split(',') : [],
+                    pricePerMonth: item.subscriptionType.typeName == "Yearly" ? item.price / 12 : item.price
+                }
+            })
+            setSubscriptionPlans(subscriptionData);
+        }
     }
 
     const handleSubscription = async (subscriptionID: number, userID: number, userEmail: string) => {
-        const response = await makeRequest("stripe/create-checkout-session", post, {
+
+        const response = await subscriptionService.createStripeCheckoutSession({
             subscriptionID,
             userID,
             userEmail,
         });
-        const { sessionUrl } = response;
-        if (sessionUrl) {
-            window.location.href = sessionUrl;
+        if (!response.isOk) {
+            toast(response.data.message, {
+                type: "error",
+                autoClose: 2000,
+            });
+        }
+        else {
+            const { sessionUrl } = response.data;
+            if (sessionUrl) {
+                window.location.href = sessionUrl;
+            }
         }
     };
 

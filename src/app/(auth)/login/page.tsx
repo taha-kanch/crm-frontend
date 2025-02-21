@@ -4,14 +4,14 @@ import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import Link from "next/link";
 import { LoginValues } from "@/utils/constants";
 import { loginSchema } from "@/utils/validations";
-import { post, useApi } from "@/helpers/useApi";
 import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
+import { AuthService } from "@/api/Services/AuthService";
+
+const authService = new AuthService();
 
 export default function LoginPage() {
 
-    const { makeRequest, loading, error, resetError } = useApi();
     const router = useRouter();
 
     const handleSubmit = async (
@@ -19,14 +19,14 @@ export default function LoginPage() {
         { setSubmitting }: FormikHelpers<LoginValues>
     ) => {
         try {
-            const response = await makeRequest("auth/login", post, values);
-            if (response.error) {
-                toast(response.message, {
+            const response = await authService.login(values);
+            if (!response.isOk) {
+                toast(response.data.message, {
                     type: "error",
                     autoClose: 2000,
                 });
             } else {
-                if (response.user.subscriptionID) {
+                if (response.data.user.subscriptionID) {
                     router.push("/");
                 } else {
                     router.push("/subscription");

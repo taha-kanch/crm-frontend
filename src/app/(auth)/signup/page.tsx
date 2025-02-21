@@ -4,13 +4,14 @@ import { ErrorMessage, Field, Form, Formik, FormikHelpers } from "formik";
 import Link from "next/link";
 import { SignupValues } from "@/utils/constants";
 import { signupSchema } from "@/utils/validations";
-import { post, useApi } from "@/helpers/useApi";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { AuthService } from "@/api/Services/AuthService";
+
+const authService = new AuthService();
 
 export default function SignupPage() {
     
-    const { makeRequest, loading, error, resetError } = useApi();
     const router = useRouter();
 
     const handleSubmit = async (
@@ -18,9 +19,9 @@ export default function SignupPage() {
         { setSubmitting }: FormikHelpers<SignupValues>
     ) => {
         try {
-            const response = await makeRequest("auth/signup", post, values);
-            if (response.error) {
-                toast(response.message, {
+            const response = await authService.login(values);
+            if (response.isOk) {
+                toast(response.data.message, {
                     type: "error",
                     autoClose: 2000,
                 });
