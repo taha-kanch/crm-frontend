@@ -19,8 +19,8 @@ export default function SignupPage() {
         { setSubmitting }: FormikHelpers<SignupValues>
     ) => {
         try {
-            const response = await authService.login(values);
-            if (response.isOk) {
+            const response = await authService.signup(values);
+            if (!response.isOk) {
                 toast(response.data.message, {
                     type: "error",
                     autoClose: 2000,
