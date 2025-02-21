@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { authHeader } from './authHeader';
 import { AuthHeader } from '@/utils/constants';
 
-const apiUrl = 'http://localhost:8080/api/v1'; // Base URL for your API
+const apiUrl = process.env.NEXT_PUBLIC_BASE_URL; // Base URL for your API
 
 // Helper function to handle JSON response
 const handleResponse = async (response: any) => {

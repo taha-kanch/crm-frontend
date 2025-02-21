@@ -19,3 +19,16 @@ export interface AuthHeader {
     },
     body?: string,
 }
+
+export interface SubscriptionPlan {
+    active: boolean,
+    description: string,
+    features: [],
+    id: number,
+    price: number,
+    pricePerMonth: number,
+    subscriptionType: {
+        typeName: string
+    },
+    typeID: number
+}
